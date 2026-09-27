@@ -1,0 +1,6 @@
+{
+  "name": "SafeWeb Inspector & Comparator",
+  "description": "Comprehensive website safety analysis and comparison tool. Verify SSL/TLS, security headers, DNS records, phishing risks, and compare two sites side by side.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
