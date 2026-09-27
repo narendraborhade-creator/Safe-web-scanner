@@ -183,33 +183,33 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-wider mb-3">
-                  <Sparkles className="w-3.5 h-3.5" /> Next-Gen Security Inspection Engine
+                  <Sparkles className="w-3.5 h-3.5" /> Live website safety check
                 </div>
                 <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                  Website Safety & <span className="gradient-text">Threat Analyzer</span>
+                  Is this website <span className="gradient-text">safe to trust?</span>
                 </h1>
                 <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
-                  Real-time cryptographic certificate auditing, HTTP security headers inspection, deceptive domain heuristics, and DNS infrastructure mapping.
+                  Enter a website and we’ll check its connection, security settings, domain signals, and anything that deserves a closer look.
                 </p>
               </div>
 
               {/* Stat Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 lg:w-96 flex-shrink-0">
                 <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
-                  <div className="text-xs text-slate-400 font-medium">Rules Audited</div>
-                  <div className="text-xl font-extrabold text-white mt-0.5">18 Checks</div>
+                  <div className="text-xs text-slate-400 font-medium">Checks included</div>
+                  <div className="text-xl font-extrabold text-white mt-0.5">18 signals</div>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
-                  <div className="text-xs text-slate-400 font-medium">Engine Mode</div>
-                  <div className="text-xl font-extrabold text-sky-400 mt-0.5">Deep Scan</div>
+                  <div className="text-xs text-slate-400 font-medium">Scan type</div>
+                  <div className="text-xl font-extrabold text-sky-400 mt-0.5">Live check</div>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
-                  <div className="text-xs text-slate-400 font-medium">Database</div>
-                  <div className="text-xl font-extrabold text-emerald-400 mt-0.5">MongoDB</div>
+                  <div className="text-xs text-slate-400 font-medium">Results</div>
+                  <div className="text-xl font-extrabold text-emerald-400 mt-0.5">Clear & useful</div>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
-                  <div className="text-xs text-slate-400 font-medium">Encryption</div>
-                  <div className="text-xl font-extrabold text-purple-400 mt-0.5">TLS 1.3</div>
+                  <div className="text-xs text-slate-400 font-medium">Privacy</div>
+                  <div className="text-xl font-extrabold text-purple-400 mt-0.5">No browsing</div>
                 </div>
               </div>
             </div>
@@ -218,7 +218,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
             <div className="glass-card p-4 sm:p-8 border-slate-750 shadow-2xl">
               <form onSubmit={handleScan} className="space-y-4">
                 <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  Target Website URL
+                  Website to check
                 </label>
                 <div className="flex flex-col sm:flex-row items-center gap-3">
                   {/* Clean Input Wrapper */}
@@ -230,7 +230,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                       type="text"
                       value={scanUrl}
                       onChange={(e) => setScanUrl(e.target.value)}
-                      placeholder="e.g. https://github.com or paypal.com"
+                      placeholder="Paste a website, e.g. github.com"
                       className="w-full bg-transparent py-3.5 pr-4 text-white text-sm sm:text-base outline-none placeholder-slate-500"
                     />
                   </div>
@@ -245,7 +245,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                     ) : (
                       <Zap className="w-4 h-4" />
                     )}
-                    <span>{scanLoading ? 'Inspecting Domain...' : 'Run Security Scan'}</span>
+                    <span>{scanLoading ? 'Checking website...' : 'Check this website'}</span>
                   </button>
                 </div>
               </form>
@@ -254,7 +254,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
               <div className="mt-5 pt-4 border-t border-slate-800">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">
-                    Quick Audits:
+                    Try an example:
                   </span>
                   {[
                     { name: 'Google (Safe)', url: 'https://google.com', safe: true },
@@ -302,9 +302,9 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <Layers className="w-5 h-5 text-sky-400" />
-                    How SafeWeb Protects You
+                    What we look for
                   </h3>
-                      <span className="text-xs text-slate-400">Select a sample to execute a live audit</span>
+                      <span className="text-xs text-slate-400">Choose an example above to see a real check</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -313,9 +313,9 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                     <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
                       <Lock className="w-6 h-6" />
                     </div>
-                    <h4 className="text-base font-bold text-white">TLS/SSL & Encryption</h4>
+                      <h4 className="text-base font-bold text-white">A secure connection</h4>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Validates Certificate Authority trust chains, remaining validity countdown, negotiated ciphers, and protocol versioning to prevent Man-in-the-Middle eavesdropping.
+                      We check whether the connection is encrypted and whether its certificate is current and trusted.
                     </p>
                   </div>
 
@@ -324,9 +324,9 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                     <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                       <FileCode className="w-6 h-6" />
                     </div>
-                    <h4 className="text-base font-bold text-white">Security Headers Audit</h4>
+                      <h4 className="text-base font-bold text-white">Helpful safety settings</h4>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Audits HSTS (Strict-Transport-Security), Content-Security-Policy (CSP), and X-Frame-Options to ensure defenses against Clickjacking, MIME-sniffing, and XSS attacks.
+                      We look for browser settings that help protect visitors from unsafe scripts, framing, and content tricks.
                     </p>
                   </div>
 
@@ -335,9 +335,9 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                     <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                       <ShieldAlert className="w-6 h-6" />
                     </div>
-                    <h4 className="text-base font-bold text-white">Heuristic Scam Defense</h4>
+                      <h4 className="text-base font-bold text-white">Suspicious domain signals</h4>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Detects lookalike brand impersonation, high-risk suspicious TLD extensions, multi-tier subdomain cloaking, and fraudulent authentication keyword traps.
+                      We flag patterns often seen in impersonation and scam websites, such as unusual names or risky domain endings.
                     </p>
                   </div>
                 </div>

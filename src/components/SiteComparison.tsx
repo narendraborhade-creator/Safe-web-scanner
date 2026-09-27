@@ -212,10 +212,10 @@ Category Breakdown:
           <GitCompare className="w-3.5 h-3.5" /> Head-to-Head Evaluation
         </div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight">
-          Side-by-Side <span className="gradient-text">Website Comparator</span>
+          Compare two <span className="gradient-text">websites</span>
         </h1>
         <p className="text-slate-400 text-sm mt-1 max-w-2xl">
-          Evaluate two domains simultaneously to spot impersonation, security header deficiencies, and protocol disparities.
+          Put two websites side by side to see which one has the stronger safety signals.
         </p>
       </div>
 
@@ -226,7 +226,7 @@ Category Breakdown:
             {/* Target 1 */}
             <div className="lg:col-span-5 space-y-1.5">
               <label className="block text-xs font-bold text-sky-400 uppercase tracking-wider">
-                Primary Target A
+                First website
               </label>
               <div className="flex items-center bg-[#070b14] border border-sky-500/30 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-500/20 rounded-xl px-3.5 py-3 gap-3 transition-all">
                 <Globe className="w-5 h-5 text-sky-400 flex-shrink-0" />
@@ -255,7 +255,7 @@ Category Breakdown:
             {/* Target 2 */}
             <div className="lg:col-span-5 space-y-1.5">
               <label className="block text-xs font-bold text-purple-400 uppercase tracking-wider">
-                Comparison Target B
+                Second website
               </label>
               <div className="flex items-center bg-[#070b14] border border-purple-500/30 focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-500/20 rounded-xl px-3.5 py-3 gap-3 transition-all">
                 <Globe className="w-5 h-5 text-purple-400 flex-shrink-0" />

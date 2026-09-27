@@ -73,7 +73,7 @@ export default function LoginPage() {
             SafeWeb <span className="gradient-text">Inspector</span>
           </h1>
           <p className="text-sm text-slate-400 mt-1 max-w-sm mx-auto">
-            Autonomous website security analysis, side-by-side comparison, and threat intelligence.
+            Check website safety in seconds, compare two sites, and understand what the results mean.
           </p>
         </div>
 

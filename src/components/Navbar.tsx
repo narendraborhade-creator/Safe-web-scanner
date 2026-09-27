@@ -16,8 +16,8 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
   const { user, logout } = useAuth();
 
   const navItems = [
-    { id: 'scan' as TabType, label: 'Inspector', icon: Search },
-    { id: 'compare' as TabType, label: 'Comparator', icon: GitCompare },
+    { id: 'scan' as TabType, label: 'Scan a site', icon: Search },
+    { id: 'compare' as TabType, label: 'Compare sites', icon: GitCompare },
     { id: 'glossary' as TabType, label: 'Glossary', icon: BookOpen },
     { id: 'history' as TabType, label: 'History', icon: History },
   ];
@@ -44,7 +44,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
                 </span>
               </div>
               <p className="hidden sm:block text-[10px] font-medium text-slate-400 tracking-wider uppercase -mt-0.5 truncate">
-                Cyber Intelligence & Safety
+                A clearer way to check a website
               </p>
             </div>
           </div>
@@ -92,7 +92,8 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
             {/* Logout Button */}
             <button
               onClick={logout}
-              title="Sign Out"
+              title="Sign out"
+              aria-label="Sign out"
               className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all duration-200"
             >
               <LogOut className="w-4 h-4" />
