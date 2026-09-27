@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import { protect, AuthRequest } from '../middleware/auth';
 import ScanHistory from '../models/ScanHistory';
+import { analyzeSite as analyzeLiveSite } from '../utils/securityAnalyzer';
 
 const router = express.Router();
 
@@ -200,7 +201,7 @@ const analyzeSite = (urlToAnalyze: string): DetailedAnalysis => {
   };
 };
 
-router.post('/check-site', protect, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/check-site', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { url } = req.body;
     if (!url || typeof url !== 'string') {
@@ -208,7 +209,7 @@ router.post('/check-site', protect, async (req: AuthRequest, res: Response): Pro
       return;
     }
 
-    const result = analyzeSite(url);
+    const result = await analyzeLiveSite(url);
     
     if (req.user) {
       await ScanHistory.create({
@@ -226,7 +227,7 @@ router.post('/check-site', protect, async (req: AuthRequest, res: Response): Pro
   }
 });
 
-router.post('/compare-sites', protect, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/compare-sites', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { url1, url2 } = req.body;
     if (!url1 || !url2 || typeof url1 !== 'string' || typeof url2 !== 'string') {
@@ -234,8 +235,7 @@ router.post('/compare-sites', protect, async (req: AuthRequest, res: Response): 
       return;
     }
 
-    const result1 = analyzeSite(url1);
-    const result2 = analyzeSite(url2);
+    const [result1, result2] = await Promise.all([analyzeLiveSite(url1), analyzeLiveSite(url2)]);
     
     const diff = result1.safetyScore - result2.safetyScore;
     let winner = 'Tie';
