@@ -7,7 +7,7 @@ export interface DetailedAnalysis {
   verdict: 'SAFE' | 'LOW_RISK' | 'SUSPICIOUS' | 'DANGEROUS';
   scores: { encryption: number; headers: number; reputation: number; infrastructure: number };
   positives: string[]; warnings: string[];
-  certificates: { issuer: string | null; protocol: string; cipher: string; validFrom: string | null; validTo: string | null; daysRemaining: number };
+  certificates: { issuer: string | null; protocol: string; cipher: string; validFrom: string | null; validTo: string | null; daysRemaining: number; trusted: boolean };
   headersAnalysis: {
     xFrameOptions: { status: boolean; value: string; description: string };
     contentSecurityPolicy: { status: boolean; value: string; description: string };
@@ -31,26 +31,26 @@ function normalizeUrl(input: string): URL {
   return url;
 }
 
-function requestHeaders(url: URL): Promise<{ status: number; headers: Headers }> {
+function requestHeaders(url: URL): Promise<{ status: number; headers: Headers; finalUrl: string }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  return fetch(url, { method: 'GET', redirect: 'follow', signal: controller.signal, headers: { 'user-agent': 'SafeWeb-Inspector/1.0' } })
-    .then(response => ({ status: response.status, headers: response.headers }))
+  return fetch(url, { method: 'GET', redirect: 'manual', signal: controller.signal, headers: { 'user-agent': 'SafeWeb-Inspector/1.0' } })
+    .then(response => ({ status: response.status, headers: response.headers, finalUrl: response.url }))
     .finally(() => clearTimeout(timer));
 }
 
 function readCertificate(url: URL): Promise<DetailedAnalysis['certificates']> {
-  if (url.protocol !== 'https:') return Promise.resolve({ issuer: null, protocol: 'None (Insecure)', cipher: 'None', validFrom: null, validTo: null, daysRemaining: 0 });
+  if (url.protocol !== 'https:') return Promise.resolve({ issuer: null, protocol: 'None (Insecure)', cipher: 'None', validFrom: null, validTo: null, daysRemaining: 0, trusted: false });
   return new Promise(resolve => {
     const socket = tls.connect({ host: url.hostname, port: Number(url.port) || 443, servername: url.hostname, rejectUnauthorized: false, timeout: REQUEST_TIMEOUT_MS }, () => {
       const certificate = socket.getPeerCertificate();
       const validTo = certificate.valid_to ? new Date(certificate.valid_to) : null;
       const daysRemaining = validTo ? Math.max(0, Math.ceil((validTo.getTime() - Date.now()) / 86400000)) : 0;
       const issuerValue = certificate.issuer?.O || certificate.issuer?.CN || null;
-      resolve({ issuer: Array.isArray(issuerValue) ? issuerValue.join(', ') : issuerValue, protocol: socket.getProtocol() || 'Unknown TLS', cipher: socket.getCipher()?.name || 'Unknown', validFrom: certificate.valid_from ? new Date(certificate.valid_from).toISOString() : null, validTo: validTo?.toISOString() || null, daysRemaining });
+      resolve({ issuer: Array.isArray(issuerValue) ? issuerValue.join(', ') : issuerValue, protocol: socket.getProtocol() || 'Unknown TLS', cipher: socket.getCipher()?.name || 'Unknown', validFrom: certificate.valid_from ? new Date(certificate.valid_from).toISOString() : null, validTo: validTo?.toISOString() || null, daysRemaining, trusted: socket.authorized });
       socket.destroy();
     });
-    const failed = (message: string) => { resolve({ issuer: null, protocol: message, cipher: 'Unknown', validFrom: null, validTo: null, daysRemaining: 0 }); socket.destroy(); };
+    const failed = (message: string) => { resolve({ issuer: null, protocol: message, cipher: 'Unknown', validFrom: null, validTo: null, daysRemaining: 0, trusted: false }); socket.destroy(); };
     socket.on('error', () => failed('TLS negotiation failed'));
     socket.on('timeout', () => failed('TLS negotiation timed out'));
   });
@@ -73,10 +73,15 @@ export async function analyzeSite(urlInput: string): Promise<DetailedAnalysis> {
   let response: { status: number; headers: Headers };
   try { response = await requestHeaders(url); } catch { throw new Error(`Could not reach ${hostname}. Check the domain and try again.`); }
   const certificate = await readCertificate(url);
-  const resolved = await dns.lookup(hostname).catch(() => null);
+  const [ipv4, ipv6, nameservers] = await Promise.all([
+    dns.resolve4(hostname).catch(() => [] as string[]),
+    dns.resolve6(hostname).catch(() => [] as string[]),
+    dns.resolveNs(hostname).catch(() => [] as string[]),
+  ]);
+  const resolved = ipv4[0] || ipv6[0] || null;
   const header = (name: string) => response.headers.get(name);
   const xFrame = header('x-frame-options'); const csp = header('content-security-policy'); const hsts = header('strict-transport-security'); const contentType = header('x-content-type-options'); const referrer = header('referrer-policy');
-  const encryption = isHttps && certificate.protocol !== 'TLS negotiation failed' && certificate.protocol !== 'TLS negotiation timed out' ? (certificate.daysRemaining > 0 ? 100 : 45) : 10;
+  const encryption = isHttps && certificate.trusted && certificate.daysRemaining > 0 ? 100 : isHttps && certificate.protocol.startsWith('TLS') ? 35 : 10;
   const headerChecks = [xFrame, csp, hsts, contentType, referrer];
   const headersScore = Math.round((headerChecks.filter(Boolean).length / headerChecks.length) * 100);
   const keywordMatches = suspiciousKeywords.filter(keyword => hostname.includes(keyword));
@@ -86,6 +91,8 @@ export async function analyzeSite(urlInput: string): Promise<DetailedAnalysis> {
   const warnings: string[] = []; const positives: string[] = [];
   if (isHttps) positives.push(`HTTPS enabled (${certificate.protocol}, ${certificate.cipher})`); else warnings.push('CRITICAL: Plain HTTP sends data without transport encryption.');
   if (response.status >= 400) warnings.push(`The site returned HTTP ${response.status}.`); else positives.push(`Reachable with HTTP ${response.status}.`);
+  if (response.status >= 300 && response.status < 400) warnings.push(`The target responds with a redirect (${response.headers.get('location') || 'destination not disclosed'}).`);
+  if (isHttps && !certificate.trusted) warnings.push('The TLS certificate could not be verified by the system trust store.');
   if (certificate.validTo && certificate.daysRemaining > 0) positives.push(`Certificate is valid for ${certificate.daysRemaining} more days.`);
   if (certificate.validTo && certificate.daysRemaining === 0) warnings.push('TLS certificate is expired or expires today.');
   if (keywordMatches.length) warnings.push(`Suspicious domain keywords detected: ${keywordMatches.join(', ')}.`);
@@ -107,6 +114,6 @@ export async function analyzeSite(urlInput: string): Promise<DetailedAnalysis> {
       xContentTypeOptions: { status: !!contentType, value: contentType || 'Missing', description: 'Prevents MIME sniffing.' },
       referrerPolicy: { status: !!referrer, value: referrer || 'Missing', description: 'Controls referrer data exposure.' },
     },
-    dnsInfo: { resolvedIp: resolved?.address || 'Unavailable', asn: 'Unavailable without an ASN provider', country: 'Unavailable', records: resolved ? [resolved.family === 6 ? 'AAAA (IPv6)' : 'A (IPv4)'] : [], nameservers: [] },
+    dnsInfo: { resolvedIp: resolved || 'Unavailable', asn: 'Unavailable without an ASN provider', country: 'Unavailable', records: [...(ipv4.length ? ['A (IPv4)'] : []), ...(ipv6.length ? ['AAAA (IPv6)'] : []), ...(nameservers.length ? ['NS (Nameserver)'] : [])], nameservers },
   };
 }

@@ -12,7 +12,6 @@ import Navbar, { TabType } from '../components/Navbar';
 import Glossary from '../components/Glossary';
 import SiteComparison, { ScanResult } from '../components/SiteComparison';
 
-import { analyzeSiteLocally } from '../utils/securityEngine';
 
 const API_BASE = '/api';
 
@@ -102,18 +101,12 @@ export default function Dashboard() {
           setScanLoading(false);
           return;
         }
+        setScanError(data.message || 'The scanner rejected this website.');
+        return;
       }
+      setScanError(`The scanner returned an unexpected response (${res.status}).`);
     } catch {
-      // fallback to client engine
-    }
-
-    // Client-Side Security Engine Fallback
-    try {
-      const localResult = analyzeSiteLocally(targetUrl);
-      setScanResult(localResult);
-      saveToLocalHistory(localResult.url, 'single', localResult);
-    } catch (err: any) {
-      setScanError(err.message || 'An error occurred while evaluating the website.');
+      setScanError('The live scanner is unavailable. Start the SafeWeb backend and try again.');
     } finally {
       setScanLoading(false);
     }
@@ -182,7 +175,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
       {/* Sticky Clean Navbar */}
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 relative z-10 space-y-6 sm:space-y-8">
         {/* ── TAB 1: SINGLE SITE SCANNER ────────────────────────────────────────── */}
         {activeTab === 'scan' && (
           <div className="space-y-8 animate-fadeIn">
@@ -192,7 +185,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-wider mb-3">
                   <Sparkles className="w-3.5 h-3.5" /> Next-Gen Security Inspection Engine
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
                   Website Safety & <span className="gradient-text">Threat Analyzer</span>
                 </h1>
                 <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
@@ -201,20 +194,20 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
               </div>
 
               {/* Stat Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 lg:w-96 flex-shrink-0">
-                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md">
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 lg:w-96 flex-shrink-0">
+                <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
                   <div className="text-xs text-slate-400 font-medium">Rules Audited</div>
                   <div className="text-xl font-extrabold text-white mt-0.5">18 Checks</div>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md">
+                <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
                   <div className="text-xs text-slate-400 font-medium">Engine Mode</div>
                   <div className="text-xl font-extrabold text-sky-400 mt-0.5">Deep Scan</div>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md">
+                <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
                   <div className="text-xs text-slate-400 font-medium">Database</div>
                   <div className="text-xl font-extrabold text-emerald-400 mt-0.5">MongoDB</div>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-md">
+                <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 shadow-md">
                   <div className="text-xs text-slate-400 font-medium">Encryption</div>
                   <div className="text-xl font-extrabold text-purple-400 mt-0.5">TLS 1.3</div>
                 </div>
@@ -222,7 +215,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
             </div>
 
             {/* Main Search Bar Card */}
-            <div className="glass-card p-6 sm:p-8 border-slate-750 shadow-2xl">
+            <div className="glass-card p-4 sm:p-8 border-slate-750 shadow-2xl">
               <form onSubmit={handleScan} className="space-y-4">
                 <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                   Target Website URL
@@ -306,12 +299,12 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
             {/* ── DEFAULT SHOWCASE WHEN NO SCAN YET ────────────────────────── */}
             {!scanResult && !scanLoading && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <Layers className="w-5 h-5 text-sky-400" />
                     How SafeWeb Protects You
                   </h3>
-                  <span className="text-xs text-slate-400">Select any sample above to execute a live audit</span>
+                      <span className="text-xs text-slate-400">Select a sample to execute a live audit</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -401,11 +394,11 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center justify-center gap-2">
+                    <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2 w-full lg:w-auto">
                       <button
                         type="button"
                         onClick={handleCopyScanReport}
-                        className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
                       >
                         {copiedScanReport ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{copiedScanReport ? 'Report Copied' : 'Copy Report'}</span>
@@ -414,7 +407,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                       <button
                         type="button"
                         onClick={handleDownloadJSON}
-                        className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>JSON</span>
@@ -424,7 +417,7 @@ ${scanResult.warnings.length > 0 ? scanResult.warnings.map((w) => `⚠ ${w}`).jo
                         href={scanResult.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-sky-600/30"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-sky-600/30"
                       >
                         <span>Visit Site</span>
                         <ArrowUpRight className="w-3.5 h-3.5" />

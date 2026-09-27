@@ -6,7 +6,6 @@ import {
   Layers, ExternalLink, ArrowUpRight, BarChart3
 } from 'lucide-react';
 import ScoreRing from './ScoreRing';
-import { compareSitesLocally } from '../utils/securityEngine';
 
 export interface ScanResult {
   url: string;
@@ -138,16 +137,12 @@ export default function SiteComparison({ token }: SiteComparisonProps) {
           setLoading(false);
           return;
         }
+        setError(data.message || 'The scanner rejected one of these websites.');
+        return;
       }
+      setError(`The scanner returned an unexpected response (${res.status}).`);
     } catch {
-      // fallback to client engine
-    }
-
-    try {
-      const localResult = compareSitesLocally(target1, target2);
-      setResult(localResult);
-    } catch (err: any) {
-      setError(err.message || 'Failed to compare websites');
+      setError('The live scanner is unavailable. Start the SafeWeb backend and try again.');
     } finally {
       setLoading(false);
     }
@@ -225,9 +220,9 @@ Category Breakdown:
       </div>
 
       {/* Main Input Form Card */}
-      <div className="card p-6 sm:p-8 space-y-6">
+      <div className="card p-4 sm:p-8 space-y-6">
         <form onSubmit={handleCompare} className="space-y-5">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-center">
             {/* Target 1 */}
             <div className="lg:col-span-5 space-y-1.5">
               <label className="block text-xs font-bold text-sky-400 uppercase tracking-wider">
@@ -246,12 +241,12 @@ Category Breakdown:
             </div>
 
             {/* Swap Button */}
-            <div className="lg:col-span-2 flex justify-center pt-5 lg:pt-5">
+            <div className="lg:col-span-2 flex justify-center lg:pt-5">
               <button
                 type="button"
                 onClick={handleSwap}
                 title="Swap websites"
-                className="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all transform hover:rotate-180 duration-300 shadow-md"
+                className="p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all transform hover:rotate-180 duration-300 shadow-md"
               >
                 <ArrowLeftRight className="w-4 h-4" />
               </button>

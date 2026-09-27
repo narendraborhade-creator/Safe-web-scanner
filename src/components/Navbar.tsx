@@ -25,7 +25,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 bg-[#0b1120]/95 backdrop-blur-md border-b border-slate-800 shadow-lg shadow-black/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between min-h-16 py-2 gap-3">
           {/* Brand Logo */}
           <div
             className="flex items-center gap-3 cursor-pointer group"
@@ -36,14 +36,14 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
                 <Shield className="w-5 h-5 text-sky-400 group-hover:scale-110 transition-transform" />
               </div>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-lg font-extrabold text-white tracking-tight">SafeWeb</span>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-wider">
                   v2.4
                 </span>
               </div>
-              <p className="text-[10px] font-medium text-slate-400 tracking-wider uppercase -mt-0.5">
+              <p className="hidden sm:block text-[10px] font-medium text-slate-400 tracking-wider uppercase -mt-0.5 truncate">
                 Cyber Intelligence & Safety
               </p>
             </div>
@@ -80,7 +80,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
             </div>
 
             {/* User Pill */}
-            <div className="flex items-center gap-2 pl-2 pr-3 py-1 bg-slate-850 rounded-full border border-slate-750">
+            <div className="hidden sm:flex items-center gap-2 pl-2 pr-3 py-1 bg-slate-850 rounded-full border border-slate-750">
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-sky-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-inner">
                 {user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
@@ -109,7 +109,7 @@ export default function Navbar({ activeTab, setActiveTab }: NavbarProps) {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                className={`flex min-w-0 items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-[11px] font-semibold ${
                   isActive ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'text-slate-400'
                 }`}
               >
